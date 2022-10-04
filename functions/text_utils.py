@@ -1,6 +1,6 @@
 import time
 from sklearn import cluster, metrics
-from sklearn import manifold, decomposition
+from sklearn import manifold
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -81,15 +81,16 @@ def ARI_fct(features,all_labels,labels_encoded,perplexity,n_components,random_st
     num_labels=len(all_labels)
      
     tsne = manifold.TSNE(
-        n_components=n_components,
+        #n_components=n_components,
         init='pca',
         random_state=random_state,
+        learning_rate='auto',
         perplexity=perplexity
     )
     X_tsne = tsne.fit_transform(features)
     
     # Détermination des clusters à partir des données après Tsne 
-    cls = cluster.KMeans(n_clusters=num_labels, n_init=100, random_state=42)
+    cls = cluster.KMeans(n_clusters=num_labels, n_init=100, random_state=random_state)
     cls.fit(X_tsne)
     
   
@@ -101,19 +102,22 @@ def ARI_fct(features,all_labels,labels_encoded,perplexity,n_components,random_st
 
 
 # visualisation du Tsne selon les vraies catégories et selon les clusters
-def TSNE_visu_fct(X_tsne,all_labels, labels_encoded, labels, ARI) :
-   
-    fig = plt.figure(figsize=(15,6))
+def TSNE_visu_fct(X_tsne,all_labels, labels_encoded, labels, ARI,title1,title2,title3='Cluster Tsne',labels_inverse=0) :
+    #print('labels',labels)
+    labels_legend = labels
+    if labels_inverse!=0:
+       labels_legend=labels_inverse
+    fig = plt.figure(figsize=(20,6))
     
     ax = fig.add_subplot(121)
     scatter = ax.scatter(X_tsne[:,0],X_tsne[:,1], c=all_labels, cmap='Set1')
     ax.legend(handles=scatter.legend_elements()[0], labels=labels_encoded, loc="best", title="Categorie")
-    plt.title('Représentation des produits par catégories réelles')
-    print('labels',labels)
+    plt.title(title1)
+    #print('labels',labels)
     ax = fig.add_subplot(122)
     scatter = ax.scatter(X_tsne[:,0],X_tsne[:,1], c=labels, cmap='Set1')
-    ax.legend(handles=scatter.legend_elements()[0], labels=set(labels), loc="best", title="Clusters")
-    plt.title('Représentation des produits par clusters')
+    ax.legend(handles=scatter.legend_elements()[0], labels=set(labels_legend), loc="best", title=title3)
+    plt.title(title2)
     
     plt.show()
 
