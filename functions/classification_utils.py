@@ -3,8 +3,16 @@ from sklearn.metrics import roc_curve,auc,adjusted_rand_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import label_binarize
 import plotly.graph_objects as go
+
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import numpy as np
- 
+import pandas as pd
+import matplotlib.pyplot as plt
+#%matplotlib inline
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+import scikitplot as skplt
 
 
 
@@ -58,7 +66,54 @@ def grid_search_cv_multiclass(model,param_grid,scoring,cv,label_encoder,all_labe
     ## Ajout graphique de clusterization
     ARI = np.round(adjusted_rand_score(y_test, labels),4)
 
-    text_utils.TSNE_visu_fct(X_test,y_test,all_labels,labels,ARI,title1,title2,title3,labels_inverse)
+    #text_utils.TSNE_visu_fct(X_test,y_test,all_labels,labels,ARI,title1,title2,title3,labels_inverse)
+    y_true=y_test
+    y_pred=gr.best_estimator_.predict(X_test)
+    y_true_label = np.array(
+        list(map(lambda label: label_encoder.inverse_transform([label])[0], y_true)
+        )
+        )
+
+    y_pred_label = np.array(
+        list(map(lambda label: label_encoder.inverse_transform([label])[0], y_pred)
+        )
+        )
+    #plot_cm(y_true, y_pred,labels_inverse)
+
+    skplt.metrics.plot_confusion_matrix(
+    y_true_label, 
+    y_pred_label,
+    figsize=(12,12))
     print('ARI',ARI)
     print('mean_auc',mean_auc)
     return mean_auc,ARI,gr
+
+
+
+
+
+def plot_cm(y_true, y_pred, labels,figsize=(10,10)):
+    cm = confusion_matrix(y_true, y_pred, labels=np.unique(y_true))
+    #cm = confusion_matrix(y_true, y_pred, labels=labels)
+    cm_sum = np.sum(cm, axis=1, keepdims=True)
+    cm_perc = cm / cm_sum.astype(float) * 100
+    annot = np.empty_like(cm).astype(str)
+    nrows, ncols = cm.shape
+    for i in range(nrows):
+        for j in range(ncols):
+            c = cm[i, j]
+            p = cm_perc[i, j]
+            if i == j:
+                s = cm_sum[i]
+                annot[i, j] = '%.1f%%\n%d/%d' % (p, c, s)
+            elif c == 0:
+                annot[i, j] = ''
+            else:
+                annot[i, j] = '%.1f%%\n%d' % (p, c)
+    cm = pd.DataFrame(cm, index=np.unique(y_true), columns=np.unique(y_true))
+    #cm = pd.DataFrame(cm, index=labels, columns=np.unique(y_true))
+    cm.head()
+    cm.index.name = 'Actual'
+    cm.columns.name = 'Predicted'
+    fig, ax = plt.subplots(figsize=figsize)
+    sns.heatmap(cm, cmap= "YlGnBu", annot=annot, fmt='', ax=ax)

@@ -79,7 +79,7 @@ def transform_dl_fct(desc_text) :
 def ARI_fct(features,all_labels,labels_encoded,perplexity,n_components,random_state) :
     time1 = time.time()
     num_labels=len(all_labels)
-     
+    
     tsne = manifold.TSNE(
         #n_components=n_components,
         init='pca',
@@ -122,3 +122,41 @@ def TSNE_visu_fct(X_tsne,all_labels, labels_encoded, labels, ARI,title1,title2,t
     plt.show()
 
     print("ARI : ", ARI)
+
+
+def compare_clusterization(features,n_clusters,real_labels,real_labels_encoded,labels_encoded,perplexity,random_state,title1,title2):
+
+
+    time1 = time.time()
+     
+    
+    tsne = manifold.TSNE(
+        #n_components=n_components,
+        init='pca',
+        random_state=random_state,
+        learning_rate='auto',
+        perplexity=perplexity
+    )
+    X_tsne = tsne.fit_transform(features)
+    
+    # Détermination des clusters à partir des données après Tsne 
+    cls = cluster.KMeans(n_clusters=n_clusters, n_init=100, random_state=random_state)
+    cls.fit(X_tsne)
+    
+  
+    ARI = np.round(metrics.adjusted_rand_score(labels_encoded, cls.labels_),4)
+    time2 = np.round(time.time() - time1,0)
+    
+    fig = plt.figure(figsize=(20,6))
+    ax = fig.add_subplot(121)
+    scatter = ax.scatter(X_tsne[:,0],X_tsne[:,1], c=real_labels_encoded, cmap='Set1')
+    ax.legend(handles=scatter.legend_elements()[0], labels=real_labels, loc="best", title="Categorie")
+    plt.title(title1)
+    #print('labels',labels)
+    ax = fig.add_subplot(122)
+    scatter = ax.scatter(X_tsne[:,0],X_tsne[:,1], c=cls.labels_, cmap='Set1')
+    ax.legend(handles=scatter.legend_elements()[0], labels=set(cls.labels_), loc="best", title=title2)
+    plt.title(title2)
+    
+    plt.show()
+    print("ARI : ", ARI, "time : ", time2)
