@@ -1,4 +1,3 @@
-from functions import text_utils
 from sklearn.metrics import roc_curve,auc,adjusted_rand_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import label_binarize
@@ -12,7 +11,7 @@ import matplotlib.pyplot as plt
 #%matplotlib inline
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
-import scikitplot as skplt
+ 
 
 
 
@@ -80,10 +79,12 @@ def grid_search_cv_multiclass(model,param_grid,scoring,cv,label_encoder,all_labe
         )
     #plot_cm(y_true, y_pred,labels_inverse)
 
-    skplt.metrics.plot_confusion_matrix(
-    y_true_label, 
-    y_pred_label,
-    figsize=(12,12))
+    #skplt.metrics.plot_confusion_matrix(
+    #y_true_label, 
+    #y_pred_label,
+    #figsize=(12,12))
+
+    plot_cm(y_true_label, y_pred_label)
     print('ARI',ARI)
     print('mean_auc',mean_auc)
     return mean_auc,ARI,gr
@@ -92,7 +93,7 @@ def grid_search_cv_multiclass(model,param_grid,scoring,cv,label_encoder,all_labe
 
 
 
-def plot_cm(y_true, y_pred, labels,figsize=(10,10)):
+def plot_cm(y_true, y_pred,figsize=(10,10)):
     cm = confusion_matrix(y_true, y_pred, labels=np.unique(y_true))
     #cm = confusion_matrix(y_true, y_pred, labels=labels)
     cm_sum = np.sum(cm, axis=1, keepdims=True)
@@ -115,5 +116,5 @@ def plot_cm(y_true, y_pred, labels,figsize=(10,10)):
     cm.head()
     cm.index.name = 'Actual'
     cm.columns.name = 'Predicted'
-    fig, ax = plt.subplots(figsize=figsize)
+    _, ax = plt.subplots(figsize=figsize)
     sns.heatmap(cm, cmap= "YlGnBu", annot=annot, fmt='', ax=ax)
