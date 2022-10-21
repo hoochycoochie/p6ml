@@ -3,7 +3,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import label_binarize
 import plotly.graph_objects as go
 
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix,classification_report
 import seaborn as sns
 import numpy as np
 import pandas as pd
@@ -85,6 +85,8 @@ def grid_search_cv_multiclass(model,param_grid,scoring,cv,label_encoder,all_labe
     #figsize=(12,12))
 
     plot_cm(y_true_label, y_pred_label)
+
+    print(classification_report(y_true_label, y_pred_label))
     print('ARI',ARI)
     print('mean_auc',mean_auc)
     return mean_auc,ARI,gr

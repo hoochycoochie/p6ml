@@ -3,12 +3,13 @@ from sklearn import cluster, metrics
 from sklearn import manifold
 import matplotlib.pyplot as plt
 import numpy as np
-
+import pandas as pd
+from matplotlib.image import imread
 
 
 # Tokenizer
-import nltk
-from nltk.tokenize import sent_tokenize, word_tokenize
+ 
+from nltk.tokenize import  word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 # Stop words
@@ -124,7 +125,7 @@ def TSNE_visu_fct(X_tsne,all_labels, labels_encoded, labels, ARI,title1,title2,t
     print("ARI : ", ARI)
 
 
-def compare_clusterization(features,n_clusters,real_labels,real_labels_encoded,labels_encoded,perplexity,random_state,title1,title2):
+def compare_clusterization(features,n_clusters,real_labels,real_labels_encoded,labels_encoded,perplexity,random_state,title1,title2,imgs=[],n=5):
 
 
     time1 = time.time()
@@ -137,6 +138,7 @@ def compare_clusterization(features,n_clusters,real_labels,real_labels_encoded,l
         learning_rate='auto',
         perplexity=perplexity
     )
+    
     X_tsne = tsne.fit_transform(features)
     
     # Détermination des clusters à partir des données après Tsne 
@@ -159,4 +161,21 @@ def compare_clusterization(features,n_clusters,real_labels,real_labels_encoded,l
     plt.title(title2)
     
     plt.show()
+
+    df_imgs = pd.DataFrame() 
+    df_imgs['label']=pd.to_numeric(cls.labels_ )
+    df_imgs['img']=imgs
+    unique_labels=sorted(df_imgs['label'].unique().tolist())
+    for lbl in unique_labels:
+        print('----------------------------------------------------')
+        print('cluster {}'.format(lbl))
+        
+        images = df_imgs[df_imgs['label']==lbl]['img'].head(n).values.tolist()
+        for i in range(n):
+            plt.subplot(250 + 1 + i)
+
+            image = imread(images[i])
+            plt.imshow(image)
+        
+        plt.show()
     print("ARI : ", ARI, "time : ", time2)
